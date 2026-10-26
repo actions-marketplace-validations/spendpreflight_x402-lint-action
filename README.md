@@ -1,3 +1,5 @@
+<p><img src="brand/logo-shield-128.png" width="96" height="96" alt="SpendPreflight shield and check"></p>
+
 # x402 Lint
 
 SpendPreflight — trust and verification tools for stablecoin payments, built for AI agents and the people who run them.
