@@ -3,6 +3,16 @@ import assert from 'node:assert/strict';
 import {urlsInput,boolInput,assess,lintUrls,summary,commentTarget,commentResults,MARKER,readJson} from '../dist/engine.js';
 const id='11111111-1111-4111-8111-111111111111';
 const report=(extra={})=>({id,expires_at:new Date(Date.now()+60000).toISOString(),outcome:'challenge_observed',http_status:402,challenge_shape_valid:true,resource_matches:true,listingGuard:{riskScore:0},findings:[],...extra});
+test('metadata injection review remains visible beyond the eight-code summary without printing payloads',()=>{
+ const findings=Array.from({length:9},(_,i)=>({level:'info',code:'context_'+i}));
+ findings.push({level:'warning',code:'metadata_prompt_injection_review',fix:'UNTRUSTED_PAYLOAD'});
+ const item=assess(report({listingGuard:{riskScore:80},findings}));
+ assert.equal(item.conclusion,'review');assert.equal(item.codes[0],'metadata_prompt_injection_review');
+ assert.equal(item.codes.length,8);const s=summary([item]);
+ assert.match(s.body,/Heuristic only/);assert.ok(!s.body.includes('UNTRUSTED_PAYLOAD'));
+ assert.equal(assess(report({findings:[...findings,{level:'error',code:'invalid_challenge'}]})).conclusion,'failing');
+ assert.equal(assess(report({outcome:'inconclusive',findings})).conclusion,'inconclusive');
+});
 test('bounded explicit HTTPS inputs only; never silently drops invalid endpoints',()=>{
  assert.deepEqual(urlsInput('https://example.com/a\nhttps://api.example.org/b'),['https://example.com/a','https://api.example.org/b']);
  for(const input of ['', 'http://example.com','https://u:p@example.com','https://127.0.0.1','https://[::1]','https://localhost','https://example.local','https://example.com:8080','https://example.com/#x',Array(6).fill('https://example.com').join('\n')])assert.throws(()=>urlsInput(input));

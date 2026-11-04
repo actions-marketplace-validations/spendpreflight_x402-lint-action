@@ -67,7 +67,14 @@ export function assess(value, now = Date.now()) {
     const complete = value.outcome === 'challenge_observed' && value.http_status === 402 && value.challenge_shape_valid === true && value.resource_matches === true && score !== null;
     const conclusion = errors ? 'failing' : !complete ? 'inconclusive' : findings.some(f => f.level === 'warning') || score > 0 ? 'review' : 'passing';
     const report = `${API}/lint/reports/${value.id}?ref=gha`, badge = `${API}/v1/lint/reports/${value.id}/badge.svg`;
-    return { conclusion, score, report, badge, codes: findings.map(f => f.code).slice(0, 8), reason: errors ? 'Hard findings require review.' : !complete ? 'No complete usable unpaid GET evidence; not proof the endpoint is down.' : 'Unpaid GET snapshot only; review heuristic findings in context.' };
+    const policyReview = findings.some(f => f.code === 'metadata_prompt_injection_review');
+    const codes = findings.map(f => f.code);
+    if (policyReview) {
+        const i = codes.indexOf('metadata_prompt_injection_review');
+        codes.splice(i, 1);
+        codes.unshift('metadata_prompt_injection_review');
+    }
+    return { conclusion, score, report, badge, codes: codes.slice(0, 8), reason: errors ? 'Hard findings require review.' : !complete ? 'No complete usable unpaid GET evidence; not proof the endpoint is down.' : policyReview ? 'Review agent-directed instructions in discovery metadata. Heuristic only; not proof of malicious intent or Coinbase rejection.' : 'Unpaid GET snapshot only; review heuristic findings in context.' };
 }
 export async function lintUrls(urls, fetcher = fetch) {
     const results = [];

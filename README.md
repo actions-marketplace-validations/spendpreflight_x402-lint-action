@@ -97,3 +97,9 @@ npm test
 ```
 
 Tests use synthetic responses and mock GitHub APIs, including the actual CLI entrypoint. They do not call a seller, consume a free check, send a real PR comment or make a payment. MIT licensed. Contact: [contact@spendpreflight.com](mailto:contact@spendpreflight.com).
+
+## Metadata content review
+
+The hosted Lint screen reports metadata_prompt_injection_review when bounded patterns match agent-directed instructions in discovery titles, descriptions, schemas or examples. It is a review warning, not proof of malicious intent or Coinbase rejection. Inspection-limit warnings remain explicit. This Action prioritizes the review code without copying untrusted metadata into logs or comments. No extra target request or payment is made. Hard errors still fail and incomplete reports remain inconclusive.
+
+Coinbase announced its policy on October 13, 2026: https://docs.cdp.coinbase.com/get-started/changelog . Its technical validator does not check that policy. Our pattern screen is not Coinbase certification; legitimate quoted examples can flag, and encoded, multilingual or novel instructions can evade it. Existing release tags are unchanged; hosted findings also reach older Action revisions.
